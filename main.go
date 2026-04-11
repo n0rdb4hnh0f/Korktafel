@@ -15,9 +15,7 @@ func main() {
 
 	mux.HandleFunc("GET /posts", handlers.GetPostsHandler)
 	mux.HandleFunc("GET /posts/{id}", handlers.GetPostHandler)
-
-	createHandler := http.HandlerFunc(handlers.CreatePostHandler)
-	mux.Handle("POST /posts", handlers.RateLimitMiddleware(createHandler))
+	mux.HandleFunc("POST /posts", handlers.CreatePostHandler)
 
 	fmt.Println("Server running at http://localhost:8080")
 
