@@ -12,11 +12,11 @@ import (
 var DB *gorm.DB
 
 type Post struct {
-	ID        string    `gorm:"primaryKey;size:21"`
-	CreatedAt time.Time `gorm:"index"`
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Content   string         `gorm:"type:text;not null"`
+	ID        string         `gorm:"primaryKey;size:21" json:"id"`
+	CreatedAt time.Time      `gorm:"index" json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"` // DeletedAtは隠すのが一般的
+	Content   string         `gorm:"column:content;type:text;not null" json:"content"`
 }
 
 func InitDB() {
