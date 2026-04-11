@@ -7,6 +7,7 @@ import (
 	"github.com/n0rdb4hnh0f/GoBBS-API/models"
 )
 
+// 投稿作成用のハンドラ関数
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	var post models.Post
 
@@ -49,6 +50,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(post)
 }
 
+// 投稿全件取得用のハンドラ関数
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	var posts []models.Post
 	result := models.DB.Order("created_at desc").Find(&posts)
@@ -60,6 +62,7 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(posts)
 }
 
+// 投稿1件取得用のハンドラ関数
 func GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var post models.Post

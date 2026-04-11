@@ -11,9 +11,20 @@ import (
 
 var DB *gorm.DB
 
+type Base struct {
+	ID string `gorm:"primaryKey;size:21" json:"id"`
+}
+
+type Thread struct {
+	Base
+	Title string `json:"title"`
+	Posts []Post `gorm:"constraint:OnDelete:CASCADE;" json:"posts"`
+}
+
 type Post struct {
-	ID        string         `gorm:"primaryKey;size:21" json:"id"`
+	Base
 	Author    string         `gorm:"type:varchar(100);not null;default:'名無し'" json:"author"`
+	ThreadID  string         `gorm:"index" json:"thread_id"`
 	CreatedAt time.Time      `gorm:"index" json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"` // DeletedAtは隠すのが一般的
@@ -28,11 +39,11 @@ func InitDB() {
 		log.Fatal(err)
 	}
 
-	DB.AutoMigrate(&Post{})
+	DB.AutoMigrate(&Thread{}, &Post{})
 
 }
 
-func (u *Post) BeforeCreate(tx *gorm.DB) (err error) {
+func (u *Base) BeforeCreate(tx *gorm.DB) (err error) {
 	id, err := gonanoid.New()
 	if err != nil {
 		return err
