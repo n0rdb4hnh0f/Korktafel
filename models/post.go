@@ -13,6 +13,7 @@ var DB *gorm.DB
 
 type Post struct {
 	ID        string         `gorm:"primaryKey;size:21" json:"id"`
+	Author    string         `gorm:"type:varchar(100);not null;default:'名無し'" json:"author"`
 	CreatedAt time.Time      `gorm:"index" json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"` // DeletedAtは隠すのが一般的

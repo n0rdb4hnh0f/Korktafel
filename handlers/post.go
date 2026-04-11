@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"golang.org/x/time/rate"
-
 	"github.com/n0rdb4hnh0f/GoBBS-API/models"
 )
 
@@ -16,6 +14,25 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON: "+err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	if post.Author == "" {
+		post.Author = "名無しさん"
+	}
+
+	if len(post.Author) > 50 {
+		http.Error(w, "Name is too long(max 100 bytes)", http.StatusBadRequest)
+		return
+	}
+
+	if post.Content == "" {
+		http.Error(w, "No content", http.StatusBadRequest)
+		return
+	}
+
+	if len(post.Content) > 49 {
+		http.Error(w, "Too long name", http.StatusBadRequest)
+	}
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -54,4 +71,3 @@ func GetPostHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
 }
-
