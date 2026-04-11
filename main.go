@@ -9,27 +9,19 @@ import (
 )
 
 func main() {
-	// 1. データベースの初期化
 	models.InitDB()
 
-	// 2. ルーティングの設定
-	// GETとPOSTを同じパスで処理したい場合は、handler側でメソッド判定するか、
-	// ここでクロージャを使って分岐させます。
-	http.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			handlers.GetPostsHandler(w, r)
-		case http.MethodPost:
-			handlers.CreatePostHandler(w, r)
-		default:
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	})
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("GET /posts", handlers.GetPostsHandler)
+	mux.HandleFunc("GET /posts/{id}", handlers.GetPostHandler)
+
+	createHandler := http.HandlerFunc(handlers.CreatePostHandler)
+	mux.Handle("POST /posts", handlers.RateLimitMiddleware(createHandler))
 
 	fmt.Println("Server running at http://localhost:8080")
 
-	// 3. サーバーの起動
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", mux); err != nil {
 		panic(err)
 	}
 }

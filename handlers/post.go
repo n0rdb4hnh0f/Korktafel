@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"golang.org/x/time/rate"
+
 	"github.com/n0rdb4hnh0f/GoBBS-API/models"
 )
 
@@ -32,9 +34,24 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	var posts []models.Post
-
-	models.DB.Order("created_at desc").Find(&posts)
-
+	result := models.DB.Order("created_at desc").Find(&posts)
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
 }
+
+func GetPostHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	var post models.Post
+	result := models.DB.First(&post, "id = ?", id)
+	if result.Error != nil {
+		http.Error(w, "Post not found", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(post)
+}
+
