@@ -11,16 +11,6 @@ import (
 
 var DB *gorm.DB
 
-type Base struct {
-	ID string `gorm:"primaryKey;size:21" json:"id"`
-}
-
-type Thread struct {
-	Base
-	Title string `json:"title"`
-	Posts []Post `gorm:"constraint:OnDelete:CASCADE;" json:"posts"`
-}
-
 type Post struct {
 	Base
 	Author    string         `gorm:"type:varchar(100);not null;default:'名無し'" json:"author"`

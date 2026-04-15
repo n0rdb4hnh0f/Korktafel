@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/n0rdb4hnh0f/GoBBS-API/handlers"
@@ -13,14 +14,22 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /posts", handlers.GetPostsHandler)
-	mux.HandleFunc("GET /posts/{id}", handlers.GetPostHandler)
+	mux.HandleFunc("GET /threads", handlers.GetThreadsHandler)
+	mux.HandleFunc("GET /threads/{id}", handlers.GetThreadDetailHandler)
 
-	createHandler := http.HandlerFunc(handlers.CreatePostHandler)
-	mux.Handle("POST /posts", handlers.RateLimitMiddleware(createHandler))
+	createThreadHandler := http.HandlerFunc(handlers.CreateThreadHandler)
+	mux.Handle("POST /threads", handlers.RateLimitMiddleware(createThreadHandler))
+
+	mux.HandleFunc("GET /posts", handlers.GetPostsHandler)
+	mux.HandleFunc("GET /posts/{id}", handlers.GetThreadDetailHandler)
+
+	createPostHandler := http.HandlerFunc(handlers.CreatePostHandler)
+	mux.Handle("POST /posts", handlers.RateLimitMiddleware(createPostHandler))
 
 	mux.Handle("/", http.FileServer(http.Dir("./static")))
 
 	fmt.Println("Server running at http://localhost:8080")
-	http.ListenAndServe(":8080", mux)
+	if err := http.ListenAndServe(":8080", mux); err != nil {
+		log.Fatal(err)
+	}
 }
