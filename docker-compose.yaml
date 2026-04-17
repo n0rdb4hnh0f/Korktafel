@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    container_name: gobbs-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TZ=Asia/Tokyo
+      # 必要に応じて環境変数を追加
+    restart: always
+
+# 実行時に models.InitDB で dbパスを "data/test.db" などに書き換えるのが理想的です
