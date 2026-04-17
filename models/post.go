@@ -2,7 +2,6 @@ package models
 
 import (
 	"log"
-	"time"
 
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"gorm.io/driver/sqlite"
@@ -12,13 +11,11 @@ import (
 var DB *gorm.DB
 
 type Post struct {
-	Base
+	Base                     // ID, CreatedAt, UpdatedAt はここに含まれる
 	Author    string         `gorm:"type:varchar(100);not null;default:'名無し'" json:"author"`
 	ThreadID  string         `gorm:"index" json:"thread_id"`
-	CreatedAt time.Time      `gorm:"index" json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"` // DeletedAtは隠すのが一般的
-	Content   string         `gorm:"column:content;type:text;not null" json:"content"`
+	Content   string         `gorm:"type:text;not null" json:"content"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 func InitDB() {

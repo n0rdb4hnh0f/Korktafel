@@ -26,8 +26,6 @@ func main() {
 	createPostHandler := http.HandlerFunc(handlers.CreatePostHandler)
 	mux.Handle("POST /posts", handlers.RateLimitMiddleware(createPostHandler))
 
-	mux.Handle("/", http.FileServer(http.Dir("./static")))
-
 	fmt.Println("Server running at http://localhost:8080")
 	if err := http.ListenAndServe(":8080", mux); err != nil {
 		log.Fatal(err)
