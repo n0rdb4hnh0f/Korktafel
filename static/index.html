@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GoBBS - 掲示板</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <h1>GoBBS 掲示板</h1>
+
+            <!-- スレッド作成フォーム -->
+            <div class="card">
+                <h3>新しいスレッドを立てる</h3>
+                <div class="form-group">
+                    <input
+                        type="text"
+                        id="threadTitle"
+                        placeholder="スレッドのタイトルを入力"
+                    />
+                    <button onclick="createThread()">スレッド作成</button>
+                </div>
+            </div>
+
+            <hr />
+
+            <h2>スレッド一覧</h2>
+            <div id="threadsList" class="list">読み込み中...</div>
+        </div>
+
+        <script>
+            // スレッド一覧を取得
+            async function loadThreads() {
+                try {
+                    // Goの mux.HandleFunc("GET /threads", ...) に対応
+                    const res = await fetch("/threads");
+                    const threads = await res.json();
+
+                    const list = document.getElementById("threadsList");
+                    list.innerHTML = "";
+
+                    if (!threads || threads.length === 0) {
+                        list.innerHTML = "<p>スレッドがありません。</p>";
+                        return;
+                    }
+
+                    threads.forEach((t) => {
+                        const item = document.createElement("div");
+                        item.className = "item";
+                        // IDやTitleはGoの構造体に合わせて（大文字小文字両方に対応できるよう記述）
+                        const id = t.ID || t.id;
+                        const title = t.Title || t.title;
+                        const createdAt = new Date(
+                            t.CreatedAt || t.created_at,
+                        ).toLocaleString();
+
+                        item.innerHTML = `
+                        <a href="thread.html?id=${id}" class="title">${title}</a>
+                        <span class="date">${createdAt}</span>
+                    `;
+                        list.appendChild(item);
+                    });
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById("threadsList").innerText =
+                        "読み込みに失敗しました。";
+                }
+            }
+
+            // スレッドを新規作成
+            async function createThread() {
+                const titleInput = document.getElementById("threadTitle");
+                const title = titleInput.value;
+                if (!title) return alert("タイトルを入力してください");
+
+                try {
+                    const res = await fetch("/threads", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ Title: title }),
+                    });
+
+                    if (res.ok) {
+                        titleInput.value = "";
+                        loadThreads(); // 一覧を再読み込み
+                    } else {
+                        const err = await res.json();
+                        alert("エラー: " + (err.error || "作成に失敗しました"));
+                    }
+                } catch (err) {
+                    alert("通信エラーが発生しました");
+                }
+            }
+
+            loadThreads();
+        </script>
+    </body>
+</html>

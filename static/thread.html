@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>スレッド詳細</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <a href="index.html" class="back-link">← スレッド一覧に戻る</a>
+            <h1 id="displayTitle">読み込み中...</h1>
+
+            <div id="postsList"></div>
+
+            <hr />
+
+            <div class="card">
+                <h3>レスを投稿する</h3>
+                <div class="form-group">
+                    <input
+                        type="text"
+                        id="author"
+                        placeholder="名前（省略可）"
+                    />
+                    <textarea
+                        id="content"
+                        placeholder="本文を入力してください"
+                    ></textarea>
+                    <button onclick="createPost()">投稿する</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const params = new URLSearchParams(window.location.search);
+            const threadId = params.get("id");
+
+            async function loadThreadDetail() {
+                if (!threadId) return;
+                try {
+                    // Goの mux.HandleFunc("GET /threads/{id}", ...) に対応
+                    const res = await fetch(`/threads/${threadId}`);
+                    if (!res.ok) throw new Error("Not Found");
+                    const thread = await res.json();
+
+                    document.getElementById("displayTitle").innerText =
+                        thread.Title || thread.title;
+
+                    const list = document.getElementById("postsList");
+                    list.innerHTML = "";
+
+                    // Thread構造体に紐付いた Posts スライスを表示
+                    const posts = thread.Posts || thread.posts || [];
+                    posts.forEach((p, index) => {
+                        const postDiv = document.createElement("div");
+                        postDiv.className = "post";
+                        const author = p.Author || p.author || "名無しさん";
+                        const content = p.Content || p.content;
+                        const date = new Date(
+                            p.CreatedAt || p.created_at,
+                        ).toLocaleString();
+
+                        postDiv.innerHTML = `
+                        <div class="post-header">${index + 1}: <b>${author}</b> <span>${date}</span></div>
+                        <div class="post-body">${content}</div>
+                    `;
+                        list.appendChild(postDiv);
+                    });
+                } catch (err) {
+                    document.getElementById("displayTitle").innerText =
+                        "スレッドが見つかりません";
+                }
+            }
+
+            async function createPost() {
+                const authorInput = document.getElementById("author");
+                const contentInput = document.getElementById("content");
+
+                const author = authorInput.value;
+                const content = contentInput.value;
+
+                if (!content) return alert("本文を入力してください");
+
+                // 送信データを明示的に作る（余計な ID や CreatedAt を含めない）
+                const payload = {
+                    thread_id: threadId,
+                    author: author || "名無しさん",
+                    content: content,
+                };
+
+                console.log("送信データを確認:", payload);
+
+                try {
+                    const res = await fetch("/posts", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(payload), // ここで payload を送る
+                    });
+
+                    if (res.ok) {
+                        contentInput.value = "";
+                        loadThreadDetail(); // 再読み込み
+                    } else {
+                        const err = await res.json();
+                        alert("エラー: " + (err.error || "投稿に失敗しました"));
+                    }
+                } catch (err) {
+                    console.error("通信エラー:", err);
+                    alert("サーバーに接続できませんでした");
+                }
+            }
+        </script>
+    </body>
+</html>

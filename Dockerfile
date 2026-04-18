@@ -27,6 +27,8 @@ WORKDIR /app
 # ビルドしたバイナリをコピー
 COPY --from=builder /app/main .
 
+COPY static/ ./static/
+
 # 実行
 EXPOSE 8080
 CMD ["./main"]
