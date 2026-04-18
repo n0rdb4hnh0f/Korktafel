@@ -39,7 +39,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// DB保存
 	if err := models.DB.WithContext(r.Context()).Create(&post).Error; err != nil {
 		ErrorJSON(w, http.StatusInternalServerError, "保存に失敗しました")
 		return
@@ -55,4 +54,20 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ResponseJSON(w, http.StatusOK, posts)
+}
+
+func GetPostDetailHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	var post models.Post
+
+	err := models.DB.WithContext(r.Context()).
+		First(&post, "id = ?", id).Error
+
+	if err != nil {
+		// gorm.ErrRecordNotFound かどうかでメッセージを分けるとより親切です
+		ErrorJSON(w, http.StatusNotFound, "投稿が見つかりません")
+		return
+	}
+
+	ResponseJSON(w, http.StatusOK, post)
 }
