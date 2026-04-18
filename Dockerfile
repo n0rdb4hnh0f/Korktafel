@@ -1,5 +1,5 @@
 # --- ビルドステージ ---
-FROM golang:1.22-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 # SQLiteのビルドに必要なツールをインストール
 RUN apk add --no-cache gcc musl-dev
