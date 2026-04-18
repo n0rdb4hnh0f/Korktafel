@@ -21,9 +21,6 @@ func main() {
 	mux.HandleFunc("GET /posts/{id}", handlers.GetPostDetailHandler)
 	mux.HandleFunc("POST /posts", handlers.CreatePostHandler)
 
-	fileServer := http.FileServer(http.Dir("./static"))
-	mux.Handle("/", fileServer)
-
 	handlersWithCors := handlers.CorsMiddleware(mux)
 	handlersWithLateLimit := handlers.RateLimitMiddleware(handlersWithCors)
 
